@@ -1,4 +1,6 @@
+#include "bit_manipulation.h"
 #include <stdio.h>
+
 /*
  * N = 111, K = 1, Operator | (OR)
  * bitmask = 001 = (1 < 0) = (1 < K - 1)
@@ -25,12 +27,3 @@ int clear_bit(int N, int K) { return N & ~(1 << (K - 1)); }
  *     110  |      111
  */
 int toggle_bit(int N, int K) { return N ^ (1 << (K - 1)); }
-
-int main() {
-  int N = 7;
-  int K = 1;
-  int output = toggle_bit(N, K);
-  printf("%b\n", output);
-
-  return 0;
-}
