@@ -9,62 +9,66 @@ typedef struct task {
 } Task;
 
 typedef struct {
-  char **data;
+  Task *data;
   size_t size;
   size_t capacity;
-} StringArray;
+} TaskList;
 
-void initialize_str_arr(StringArray *str_arr, const size_t initial_capacity) {
-  // Allocate initial_capacity amount of pointers to data, which is pointer that
-  // points to pointers, like an array of pointers
-  str_arr->size = 0;
-  if (initial_capacity <= 0) {
-    str_arr->data = NULL;
-    str_arr->capacity = 0;
+void init_task_list(TaskList *arr, size_t init_cap) {
+  arr->size = 0;
+  if (init_cap == 0) {
+    arr->capacity = 0;
+    arr->data = NULL;
+    return;
   }
-  str_arr->data = malloc(sizeof(char *) * initial_capacity);
-  str_arr->capacity = initial_capacity;
+  arr->capacity = init_cap;
+  arr->data = malloc(sizeof(Task) * init_cap);
+  if (!arr->data) {
+    perror("Failed to malloc task");
+    arr->capacity = 0;
+    return;
+  }
 }
 
-void push_string(StringArray *str_arr, const char *str) {
-  // size is the current index and size before pushing new string
-  if (str_arr->size >= str_arr->capacity) {
-    size_t new_capacity = str_arr->capacity == 0 ? 4 : str_arr->capacity * 2;
-    char **temp = realloc(str_arr->data, new_capacity * sizeof(char *));
+void push_task(TaskList *arr, Task task) {
+  if (arr->size >= arr->capacity) {
+    size_t new_capacity = arr->capacity == 0 ? 4 : arr->capacity * 2;
+    Task *temp = realloc(arr->data, sizeof(Task) * new_capacity);
     if (!temp) {
-      perror("Failed to allocate temporary string");
+      perror("Failed to realloc task");
       return;
     }
-    str_arr->data = temp;
-    str_arr->capacity = new_capacity;
+    arr->capacity = new_capacity;
+    arr->data = temp;
   }
-  // *(((*str_arr).data) + ((*str_arr).size)) = malloc(strlen(str) + 1);
-  // *((str_arr->data) + (str_arr->size)) = malloc(strlen(str) + 1);
-  str_arr->data[str_arr->size] = malloc(strlen(str) + 1);
-  if (!str_arr->data[str_arr->size]) {
-    perror("Failed to allocate string");
-    return;
-  }
-  strcpy(str_arr->data[str_arr->size], str);
-  str_arr->size++;
+  arr->data[arr->size] = task;
+  arr->size++;
 }
 
-void pop_string(StringArray *str_arr) {
-  // Handle empty array
-  if (str_arr->size == 0) {
+void pop_task(TaskList *arr) {
+  if (arr->size == 0) {
     return;
   }
-  str_arr->size--;
-  // Free the string in the memory
-  free(str_arr->data[str_arr->size]);
-  // Clearing pointer to the string
-  str_arr->data[str_arr->size] = NULL;
+  arr->size--;
+  // Free String in Task
+  free(arr->data[arr->size].description);
+  arr->data[arr->size].description = NULL;
+}
+
+void free_task_list(TaskList *arr) {
+  for (int i = 0; i < arr->size; i++) {
+    free(arr->data[i].description);
+    arr->data[i].description = NULL;
+  }
+  free(arr->data);
+  arr->data = NULL;
 }
 
 int main() {
-  int capacity = 8;
-  Task **ptr = malloc(sizeof(Task *) * capacity);
+  int capacity = 4;
   Task *task = malloc(sizeof(Task));
+  TaskList task_list;
+  init_task_list(&task_list, capacity);
 
   printf("Enter a new task\n");
   char *input = read_dynamic_string();
@@ -73,5 +77,9 @@ int main() {
   task->description = input;
 
   printf("%d. %s\n", 1, task->description);
+
+  push_task(&task_list, *task);
+  free(task);
+  free_task_list(&task_list);
   return 0;
 }
