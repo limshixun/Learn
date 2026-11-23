@@ -1,4 +1,5 @@
 #include "read_string.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,22 +65,61 @@ void free_task_list(TaskList *arr) {
   arr->data = NULL;
 }
 
+int ch;
+void consume_line() {
+  while ((ch = getchar()) && ch != '\n' && ch != EOF) {
+  }
+}
+
+void print_arr(TaskList *arr) {
+  if (arr->size == 0) {
+    printf("The tasks is empty\n");
+    return;
+  }
+  for (int i = 0; i < (arr->size); i++) {
+    printf("[%d] %s\n", i, arr->data[i].description);
+  }
+}
+
 int main() {
   int capacity = 4;
-  Task *task = malloc(sizeof(Task));
   TaskList task_list;
   init_task_list(&task_list, capacity);
 
-  printf("Enter a new task\n");
-  char *input = read_dynamic_string();
+  char option;
+  int index;
 
-  task->status = 1;
-  task->description = input;
+  printf("%s", "a: add\n");
+  printf("%s", "x: remove\n");
+  printf("%s", "l: list\n");
+  printf("%s", "q: quit\n");
+  do {
+    printf("Enter option: ");
+    // Leading space to ignore whitespaces (space, tab , newline) in the input
+    // buffer before reading the next non whitespace character
+    // Consume \n from read dynamic string
+    scanf(" %c", &option);
 
-  printf("%d. %s\n", 1, task->description);
-
-  push_task(&task_list, *task);
-  free(task);
-  free_task_list(&task_list);
+    if (option == 'q') {
+      free_task_list(&task_list);
+      printf("%s", "Bye.\n");
+    } else if (option == 'a') {
+      printf("Enter a new task: ");
+      // Consume next line from previous scanf
+      consume_line();
+      char *input = read_dynamic_string();
+      Task *task = malloc(sizeof(Task));
+      task->status = 1;
+      task->description = input;
+      push_task(&task_list, *task);
+      free(task);
+    } else if (option == 'x') {
+      pop_task(&task_list);
+    } else if (option == 'l') {
+      print_arr(&task_list);
+    } else {
+      printf("%s", "Please enter a valid option.\n");
+    }
+  } while (option != 'q');
   return 0;
 }
