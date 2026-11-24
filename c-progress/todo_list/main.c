@@ -1,4 +1,5 @@
 #include "read_string.h"
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,10 +64,12 @@ void free_task_list(TaskList *arr) {
   }
   free(arr->data);
   arr->data = NULL;
+  arr->capacity = 0;
+  arr->size = 0;
 }
 
-int ch;
 void consume_line() {
+  int ch;
   while ((ch = getchar()) && ch != '\n' && ch != EOF) {
   }
 }
@@ -77,7 +80,38 @@ void print_arr(TaskList *arr) {
     return;
   }
   for (int i = 0; i < (arr->size); i++) {
-    printf("[%d] %s\n", i, arr->data[i].description);
+    char ch = ' ';
+    if (arr->data[i].status == 1)
+      ch = 'x';
+    printf("%d. [%c] %s\n", i + 1, ch, arr->data[i].description);
+  }
+}
+
+void toggle_mode(TaskList *task_list) {
+  int buf_size = 48;
+  char toggle_option[buf_size];
+  do {
+    print_arr(task_list);
+    printf("Select item by index to toggle: \n");
+    fgets(toggle_option, buf_size, stdin);
+    if (toggle_option[0] == 'q') {
+      printf("Exit toggle mode\n");
+      continue;
+    }
+    int number = strtol(toggle_option, NULL, 10);
+    if (!(number > 0 && number <= task_list->size)) {
+      printf("Invalid task index\n");
+      continue;
+    }
+    task_list->data[number - 1].status ^= 1;
+  } while (toggle_option[0] != 'q');
+}
+
+const char *OPTIONS[] = {"add", "remove", "list", "toggle", "quit"};
+
+void print_options() {
+  for (size_t i = 0; i < (sizeof(OPTIONS) / sizeof(char *)); i++) {
+    printf("%c: %s\n", tolower((unsigned char)OPTIONS[i][0]), OPTIONS[i]);
   }
 }
 
@@ -85,14 +119,8 @@ int main() {
   int capacity = 4;
   TaskList task_list;
   init_task_list(&task_list, capacity);
-
   char option;
-  int index;
-
-  printf("%s", "a: add\n");
-  printf("%s", "x: remove\n");
-  printf("%s", "l: list\n");
-  printf("%s", "q: quit\n");
+  print_options();
   do {
     printf("Enter option: ");
     // Leading space to ignore whitespaces (space, tab , newline) in the input
@@ -109,14 +137,16 @@ int main() {
       consume_line();
       char *input = read_dynamic_string();
       Task *task = malloc(sizeof(Task));
-      task->status = 1;
+      task->status = 0;
       task->description = input;
       push_task(&task_list, *task);
       free(task);
-    } else if (option == 'x') {
+    } else if (option == 'r') {
       pop_task(&task_list);
     } else if (option == 'l') {
       print_arr(&task_list);
+    } else if (option == 't') {
+      toggle_mode(&task_list);
     } else {
       printf("%s", "Please enter a valid option.\n");
     }
