@@ -8,7 +8,7 @@ typedef struct {
   size_t capacity;
 } StringArray;
 
-void print_arr(StringArray *arr) {
+void print_str_arr(StringArray *arr) {
   for (int i = 0; i < (arr->size); i++) {
     printf("[%d] %s\n", i, arr->data[i]);
   }
@@ -61,16 +61,16 @@ void pop_string(StringArray *str_arr) {
   str_arr->data[str_arr->size] = NULL;
 }
 
-int main() {
-  StringArray arr;
-  initialize_str_arr(&arr, 4);
-  push_string(&arr, "This is the first ever string array element to be pushed");
-  push_string(&arr, "Here is another");
-
-  printf("Printing string array\n");
-  print_arr(&arr);
-  pop_string(&arr);
-  printf("Printing after pop\n");
-  print_arr(&arr);
-  printf("Finished printing string array\n");
-}
+// int main() {
+//   StringArray arr;
+//   initialize_str_arr(&arr, 4);
+//   push_string(&arr, "This is the first ever string array element to be
+//   pushed"); push_string(&arr, "Here is another");
+//
+//   printf("Printing string array\n");
+//   print_str_arr(&arr);
+//   pop_string(&arr);
+//   printf("Printing after pop\n");
+//   print_str_arr(&arr);
+//   printf("Finished printing string array\n");
+// }
