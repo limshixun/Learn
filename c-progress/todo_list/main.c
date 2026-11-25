@@ -1,4 +1,5 @@
 #include "read_string.h"
+#include "string_array.h"
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -115,10 +116,58 @@ void print_options() {
   }
 }
 
+StringArray *split(StringArray *str_arr, char *str, char *delimeter) {
+  char *token = strtok(str, delimeter);
+  while (token != NULL) {
+    push_string(str_arr, token);
+    token = strtok(NULL, delimeter);
+  }
+  return str_arr;
+}
+
+void load_tasks(TaskList *task_list) {
+  // Create/Open file
+  FILE *fptr = fopen("todo.txt", "r");
+
+  if (fptr == NULL) {
+    printf("Error opening file!\n");
+    return;
+  }
+
+  StringArray sa;
+  initialize_str_arr(&sa, 4);
+
+  char buffer[256];
+
+  while (fgets(buffer, sizeof(buffer), fptr) != NULL) {
+    buffer[strcspn(buffer, "\n")] = '\0';
+    split(&sa, buffer, "|");
+    if (sa.size == 2) {
+      Task task;
+      task.status = strtol(sa.data[0], NULL, 10);
+      task.description = malloc(strlen(sa.data[1]) + 1);
+      strcpy(task.description, sa.data[1]);
+      push_task(task_list, task);
+    }
+    while (sa.size > 0) {
+      pop_string(&sa);
+    }
+  }
+  free(sa.data);
+  sa.data = NULL;
+  sa.size = 0;
+  fclose(fptr);
+}
+
 int main() {
+
+  // Task list
   int capacity = 4;
   TaskList task_list;
   init_task_list(&task_list, capacity);
+
+  load_tasks(&task_list);
+
   char option;
   print_options();
   do {

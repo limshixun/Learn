@@ -1,0 +1,4 @@
+1|something
+0|another
+0|censure
+1|countenance
