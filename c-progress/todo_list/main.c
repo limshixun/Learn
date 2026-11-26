@@ -159,6 +159,22 @@ void load_tasks(TaskList *task_list) {
   fclose(fptr);
 }
 
+void save_tasks(TaskList *task_list) {
+  FILE *fptr = fopen("todo.txt", "w");
+  if (!fptr) {
+    printf("Error opening file!\n");
+    return;
+  }
+
+  for (size_t i = 0; i < task_list->size; i++) {
+    char *text = task_list->data[i].description;
+    int status = task_list->data[i].status;
+    fprintf(fptr, "%d|%s\n", status, text);
+  }
+
+  fclose(fptr);
+}
+
 int main() {
 
   // Task list
@@ -190,12 +206,15 @@ int main() {
       task->description = input;
       push_task(&task_list, *task);
       free(task);
+      save_tasks(&task_list);
     } else if (option == 'r') {
       pop_task(&task_list);
+      save_tasks(&task_list);
     } else if (option == 'l') {
       print_arr(&task_list);
     } else if (option == 't') {
       toggle_mode(&task_list);
+      save_tasks(&task_list);
     } else {
       printf("%s", "Please enter a valid option.\n");
     }
